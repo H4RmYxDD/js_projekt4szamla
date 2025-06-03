@@ -1,0 +1,285 @@
+body {
+  font-family: 'Segoe UI', Arial, sans-serif;
+  background: #f6f8fa;
+  margin: 0;
+  padding: 0;
+}
+
+h1 {
+  background: #1976d2;
+  color: #fff;
+  margin: 0 0 2rem 0;
+  padding: 1.5rem 2rem;
+  font-size: 2rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+}
+
+h2 {
+  color: #1976d2;
+  margin-top: 2rem;
+  margin-bottom: 0.7rem;
+  font-size: 1.2rem;
+  font-weight: 500;
+}
+
+.form-container {
+  display: flex;
+  gap: 2rem;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.form-container section {
+  flex: 1 1 320px;
+  min-width: 280px;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px #0001;
+  padding: 1.5rem 1.5rem 1rem 1.5rem;
+}
+
+section h2 {
+  border-bottom: 1px solid #e3f2fd;
+  padding-bottom: 0.5em;
+  margin-bottom: 1em;
+  font-size: 1.1em;
+  letter-spacing: 0.01em;
+}
+
+form label {
+  display: block;
+  margin: 0.8em 0 0.2em 0;
+  color: #1976d2;
+  font-weight: 500;
+}
+
+form input {
+  font-size: 1em;
+  padding: 0.45em 0.7em;
+  margin-bottom: 0.7em;
+  border-radius: 5px;
+  border: 1px solid #b0bec5;
+  width: 100%;
+  box-sizing: border-box;
+  background: #f8fafc;
+  transition: border 0.2s;
+}
+
+form input:focus {
+  border: 1.5px solid #1976d2;
+  outline: none;
+  background: #fff;
+}
+
+form button {
+  background: #1976d2;
+  color: #fff;
+  border: none;
+  margin-top: 1em;
+  cursor: pointer;
+  font-size: 1em;
+  font-weight: 600;
+  padding: 0.6em 1.2em;
+  border-radius: 6px;
+  transition: background 0.2s;
+}
+
+form button:hover {
+  background: #125ea2;
+}
+
+ul {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 1.5rem 0;
+  max-width: 500px;
+}
+
+ul li {
+  background: #fff;
+  margin-bottom: 0.5em;
+  padding: 0.7em 1em;
+  border-radius: 6px;
+  box-shadow: 0 1px 4px #0001;
+  cursor: pointer;
+  transition: background 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+ul li:hover, ul li.selected {
+  background: #e3f2fd;
+}
+
+ul li button {
+  margin-left: 0.5em;
+  background: #e3f2fd;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  padding: 0.2em 0.7em;
+  font-size: 1em;
+  transition: background 0.2s;
+}
+
+ul li button:hover {
+  background: #1976d2;
+  color: #fff;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  box-shadow: 0 2px 8px #0001;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 2rem;
+  table-layout: auto;
+}
+
+th, td {
+  padding: 0.8em 1em;
+  border-bottom: 1px solid #e3eaf2;
+  text-align: left;
+  font-size: 1em;
+}
+
+th {
+  background: #e3f2fd;
+  color: #1976d2;
+  font-weight: 600;
+}
+
+tr:last-child td {
+  border-bottom: none;
+}
+
+tbody tr:hover {
+  background: #f1f8ff;
+  transition: background 0.2s;
+}
+
+footer {
+  margin-top: 3em;
+  padding: 1.5em 0 0.5em 0;
+  color: #888;
+  text-align: center;
+  font-size: 0.95em;
+  border-top: 1px solid #e3f2fd;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  background: #e3f2fd;
+}
+::-webkit-scrollbar-thumb {
+  background: #90caf9;
+  border-radius: 6px;
+}
+
+@media (max-width: 900px) {
+  .form-container {
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+  .form-container section {
+    max-width: 100%;
+  }
+}
+/* Listaelem gombcsoport mindig jobb oldalon, egymás alatt */
+ul li {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1.5em;
+}
+
+.btn-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5em;
+  min-width: 110px;
+}
+
+.btn-group button {
+  width: 100%;
+  margin: 0;
+  padding: 0.5em 0.7em;
+  font-size: 1em;
+  border-radius: 5px;
+  border: none;
+  background: #e3f2fd;
+  color: #1976d2;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-group button:hover {
+  background: #1976d2;
+  color: #fff;
+}
+
+.edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7em;
+  width: 100%;
+  max-width: none;      
+  padding: 1em 1.2em;
+  background: #e3f2fd;
+  border-radius: 10px;
+  box-sizing: border-box;
+}
+
+.edit-form input {
+  width: 100%;           
+  font-size: 1.15em;
+  padding: 0.7em 1em;
+  border-radius: 6px;
+  border: 1.5px solid #1976d2;
+  background: #fff;
+  box-sizing: border-box;
+}
+
+.edit-btn-row {
+  display: flex;
+  gap: 1em;
+}
+
+.edit-btn-row button {
+  flex: 1 1 100px;
+  padding: 0.6em 0.7em;
+  font-size: 1em;
+  border-radius: 5px;
+  border: none;
+  background: #e3f2fd;
+  color: #1976d2;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.edit-btn-row button:hover {
+  background: #1976d2;
+  color: #fff;
+}
+ul li {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.btn-group {
+  display: flex;
+  flex-direction: column;
+  align-self: stretch; /* vagy width: 100% */
+  margin-top: 0.5em;
+}
+
+.btn-group button {
+  width: 100%;
+  margin: 0.2em 0;
+}

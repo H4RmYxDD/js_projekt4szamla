@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8">
+  <title>Számlakezelő</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>Számlakezelő</h1>
+
+  <div class="form-container">
+  <section>
+    <h2>Új számla rögzítése</h2>
+    <form id="invoiceForm">
+      <label>Kiállító ID: <input type="number" name="issuer_id" required></label>
+      <label>Vevő ID: <input type="number" name="customer_id" required></label>
+      <label>Számla száma: <input type="text" name="invoice_number" required></label>
+      <label>Kelte: <input type="date" name="issue_date" required></label>
+      <label>Teljesítés dátuma: <input type="date" name="fulfillment_date" required></label>
+      <label>Fizetési határidő: <input type="date" name="payment_deadline" required></label>
+      <label>Végösszeg: <input type="number" name="total_amount" required></label>
+      <label>ÁFA: <input type="number" name="vat_amount" required></label>
+      <button type="submit">Mentés</button>
+    </form>
+  </section>
+  <section>
+    <h2>Vevő hozzáadása</h2>
+    <form id="customerForm">
+      <label>Név: <input type="text" name="name" required></label>
+      <label>Cím: <input type="text" name="address" required></label>
+      <label>Adószám: <input type="text" name="tax_number" required></label>
+      <button type="submit">Hozzáadás</button>
+    </form>
+  </section>
+</div>
+
+  <h2>Kiállítók</h2>
+  <ul id="issuers"></ul>
+
+
+<h2>Vevők</h2>
+<ul id="customers"></ul>
+
+  <h2>Vevő számlái</h2>
+  <table id="invoices">
+    <thead>
+      <tr>
+        <th>Kiállító</th>
+        <th>Számla szám</th>
+        <th>Kelte</th>
+        <th>Teljesítés</th>
+        <th>Fizetési határidő</th>
+        <th>Végösszeg</th>
+        <th>ÁFA</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script src="script.js"></script>
+</body>
+</html>
