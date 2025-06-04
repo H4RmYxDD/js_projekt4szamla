@@ -6,57 +6,81 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h1>Számlakezelő</h1>
-
-  <div class="form-container">
-  <section>
-    <h2>Új számla rögzítése</h2>
-    <form id="invoiceForm">
-      <label>Kiállító ID: <input type="number" name="issuer_id" required></label>
-      <label>Vevő ID: <input type="number" name="customer_id" required></label>
-      <label>Számla száma: <input type="text" name="invoice_number" required></label>
-      <label>Kelte: <input type="date" name="issue_date" required></label>
-      <label>Teljesítés dátuma: <input type="date" name="fulfillment_date" required></label>
-      <label>Fizetési határidő: <input type="date" name="payment_deadline" required></label>
-      <label>Végösszeg: <input type="number" name="total_amount" required></label>
-      <label>ÁFA: <input type="number" name="vat_amount" required></label>
-      <button type="submit">Mentés</button>
-    </form>
-  </section>
-  <section>
-    <h2>Vevő hozzáadása</h2>
-    <form id="customerForm">
-      <label>Név: <input type="text" name="name" required></label>
-      <label>Cím: <input type="text" name="address" required></label>
-      <label>Adószám: <input type="text" name="tax_number" required></label>
-      <button type="submit">Hozzáadás</button>
-    </form>
-  </section>
-</div>
-
-  <h2>Kiállítók</h2>
-  <ul id="issuers"></ul>
-
-
-<h2>Vevők</h2>
-<ul id="customers"></ul>
-
-  <h2>Vevő számlái</h2>
-  <table id="invoices">
-    <thead>
-      <tr>
-        <th>Kiállító</th>
-        <th>Számla szám</th>
-        <th>Kelte</th>
-        <th>Teljesítés</th>
-        <th>Fizetési határidő</th>
-        <th>Végösszeg</th>
-        <th>ÁFA</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
-
+  <header>
+    <h1>Számlakezelő</h1>
+  </header>
+  <main>
+    <section class="flex-row">
+      <div class="panel">
+        <h2>Új vevő</h2>
+        <form id="customerForm">
+          <input type="text" name="name" placeholder="Név" required>
+          <input type="text" name="address" placeholder="Cím" required>
+          <input type="text" name="tax_number" placeholder="Adószám" required>
+          <button type="submit">Vevő hozzáadása</button>
+        </form>
+        <h3>Vevők</h3>
+        <ul id="customers"></ul>
+      </div>
+      <div class="panel">
+        <h2>Új számla</h2>
+        <form id="invoiceForm">
+          <input type="number" name="issuer_id" placeholder="Kiállító (ID)" required>
+          <input type="number" name="customer_id" placeholder="Vevő (ID)" required>
+          <input type="text" name="invoice_number" placeholder="Számla száma" required>
+          <input type="date" name="issue_date" placeholder="Kelte" required>
+          <input type="date" name="fulfillment_date" placeholder="Teljesítés dátuma" required>
+          <input type="date" name="payment_deadline" placeholder="Fizetési határidő" required>
+          <input type="number" name="total_amount" placeholder="Végösszeg" required>
+          <input type="number" name="vat_amount" placeholder="ÁFA" required>
+          <button type="submit">Számla mentése</button>
+        </form>
+        <h3>Számlatételek</h3>
+        <form id="itemForm" class="inline-form">
+          <input type="text" name="name" placeholder="Tétel neve" required>
+          <input type="number" name="quantity" step="any" placeholder="Mennyiség" required>
+          <input type="text" name="unit" placeholder="Egység" required>
+          <input type="number" name="unit_price" step="any" placeholder="Egységár" required>
+          <input type="number" name="net_amount" step="any" placeholder="Nettó" required>
+          <input type="number" name="vat_amount" step="any" placeholder="ÁFA" required>
+          <input type="number" name="gross_amount" step="any" placeholder="Bruttó" required>
+          <button type="submit">+</button>
+        </form>
+        <table id="itemsTable">
+          <thead>
+            <tr>
+              <th>Név</th><th>Menny.</th><th>Egység</th><th>Egységár</th><th>Nettó</th><th>ÁFA</th><th>Bruttó</th><th></th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+    <section class="panel">
+      <h2>Számlák</h2>
+      <table id="invoices">
+        <thead>
+          <tr>
+            <th>Számla szám</th>
+            <th>Kiállító</th>
+            <th>Vevő</th>
+            <th>Kelte</th>
+            <th>Teljesítés</th>
+            <th>Határidő</th>
+            <th>Végösszeg</th>
+            <th>ÁFA</th>
+            <th>Státusz</th>
+            <th>Művelet</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </section>
+    <section class="panel">
+      <h2>Számla részletei</h2>
+      <div id="invoiceDetails"></div>
+    </section>
+  </main>
   <script src="script.js"></script>
 </body>
 </html>
