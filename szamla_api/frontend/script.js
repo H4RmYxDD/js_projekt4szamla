@@ -1,6 +1,5 @@
 let lastInvoiceId = null;
 
-// Vevő űrlap validálás és hibakezelés
 document.getElementById('customerForm').onsubmit = function(e) {
   e.preventDefault();
   const errorDiv = document.getElementById('customerError');
@@ -52,7 +51,6 @@ document.getElementById('customerForm').onsubmit = function(e) {
   });
 };
 
-// Számla űrlap validálás és hibakezelés
 document.getElementById('invoiceForm').onsubmit = function(e) {
   e.preventDefault();
   const errorDiv = document.getElementById('invoiceError');
@@ -62,7 +60,6 @@ document.getElementById('invoiceForm').onsubmit = function(e) {
   }
 
   const data = Object.fromEntries(new FormData(this).entries());
-  // Validálás
   if (!data.issuer_id || !data.customer_id) {
     if (errorDiv) {
       errorDiv.textContent = 'Kiállító és vevő kiválasztása kötelező!';
@@ -168,25 +165,27 @@ function loadInvoices() {
     .then(invoices => {
       const tbody = document.querySelector('#invoices tbody');
       tbody.innerHTML = '';
-      invoices.forEach(inv => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td>${inv.invoice_number}</td>
-          <td>${inv.issuer_name}</td>
-          <td>${inv.customer_name}</td>
-          <td>${inv.issue_date}</td>
-          <td>${inv.fulfillment_date}</td>
-          <td>${inv.payment_deadline}</td>
-          <td>${inv.total_amount}</td>
-          <td>${inv.vat_amount}</td>
-          <td>${inv.is_storno ? 'Stornózva' : 'Érvényes'}</td>
-          <td>
-            <button class="details-btn" data-id="${inv.id}">Részletek</button>
-            <button class="storno-btn" data-id="${inv.id}" ${inv.is_storno ? 'disabled' : ''}>Stornózás</button>
-          </td>
-        `;
-        tbody.appendChild(tr);
-      });
+      invoices
+        .filter(inv => !inv.invoice_number.endsWith('-ST'))
+        .forEach(inv => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td>${inv.invoice_number}</td>
+            <td>${inv.issuer_name}</td>
+            <td>${inv.customer_name}</td>
+            <td>${inv.issue_date}</td>
+            <td>${inv.fulfillment_date}</td>
+            <td>${inv.payment_deadline}</td>
+            <td>${inv.total_amount}</td>
+            <td>${inv.vat_amount}</td>
+            <td>${inv.is_storno ? 'Stornózva' : 'Érvényes'}</td>
+            <td>
+              <button class="details-btn" data-id="${inv.id}">Részletek</button>
+              <button class="storno-btn" data-id="${inv.id}" ${inv.is_storno ? 'disabled' : ''}>Stornózás</button>
+            </td>
+          `;
+          tbody.appendChild(tr);
+        });
       document.querySelectorAll('.details-btn').forEach(btn => {
         btn.onclick = function() {
           showInvoiceDetails(this.dataset.id);
@@ -212,6 +211,8 @@ function showInvoiceDetails(invoiceId) {
       const netAmount = (inv.total_amount - inv.vat_amount).toFixed(2);
       const vatAmount = Number(inv.vat_amount).toFixed(2);
       const grossAmount = Number(inv.total_amount).toFixed(2);
+
+      const grossInWords = numberToHungarianWords(Math.round(inv.total_amount));
 
       const div = document.getElementById('invoiceDetails');
       div.innerHTML = `
@@ -244,13 +245,62 @@ function showInvoiceDetails(invoiceId) {
         <div style="margin-top:1em;">
           <b>Nettó ár:</b> ${netAmount} Ft<br>
           <b>ÁFA:</b> ${vatAmount} Ft<br>
-          <b>Bruttó ár:</b> ${grossAmount} Ft
+          <b>Bruttó ár:</b> ${grossAmount} Ft<br>
+          <span style="font-size:0.95em;color:#555"><i>${grossInWords}</i></span>
         </div>
       </div>
     </div>
   </div>
       `;
     });
+}
+function numberToHungarianWords(num) {
+  const ones = ['', 'egy', 'kettő', 'három', 'négy', 'öt', 'hat', 'hét', 'nyolc', 'kilenc'];
+  const tens = ['', 'tíz', 'húsz', 'harminc', 'negyven', 'ötven', 'hatvan', 'hetven', 'nyolcvan', 'kilencven'];
+  const teens = ['tíz', 'tizenegy', 'tizenkettő', 'tizenhárom', 'tizennégy', 'tizenöt', 'tizenhat', 'tizenhét', 'tizennyolc', 'tizenkilenc'];
+
+  if (num === 0) return 'nulla forint';
+
+  let n = Math.floor(num);
+  let parts = [];
+
+  if (n >= 1000000) {
+    const mill = Math.floor(n / 1000000);
+    parts.push(numberToHungarianWords(mill).replace(' forint', '') + 'millió');
+    n %= 1000000;
+  }
+  if (n >= 1000) {
+    const ez = Math.floor(n / 1000);
+    if (ez > 1) {
+      parts.push(numberToHungarianWords(ez).replace(' forint', '') + 'ezer');
+    } else if (ez === 1) {
+      parts.push('ezer');
+    }
+    n %= 1000;
+  }
+  if (n >= 100) {
+    const sz = Math.floor(n / 100);
+    if (sz > 1) {
+      parts.push(ones[sz] + 'száz');
+    } else {
+      parts.push('száz');
+    }
+    n %= 100;
+  }
+  if (n >= 20) {
+    parts.push(tens[Math.floor(n / 10)]);
+    n %= 10;
+  }
+  if (n >= 10) {
+    parts.push(teens[n - 10]);
+    n = 0;
+  }
+  if (n > 0) {
+    parts.push(ones[n]);
+  }
+
+  let result = parts.join('-').replace(/--+/g, '-').replace(/^-|-$/g, '');
+  return result + ' forint';
 }
 
 document.getElementById('customerSelect').addEventListener('change', generateInvoiceNumber);
