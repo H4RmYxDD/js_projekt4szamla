@@ -1,64 +1,107 @@
-let items = [];
 let lastInvoiceId = null;
 
+// Vevő űrlap validálás és hibakezelés
 document.getElementById('customerForm').onsubmit = function(e) {
   e.preventDefault();
-  const data = Object.fromEntries(new FormData(this).entries());
+  const errorDiv = document.getElementById('customerError');
+  if (errorDiv) {
+    errorDiv.classList.remove('active');
+    errorDiv.textContent = '';
+  }
+
+  const name = this.name.value.trim();
+  const address = this.address.value.trim();
+  const tax_number = this.tax_number.value.trim();
+
+  if (!name || !address || !tax_number) {
+    if (errorDiv) {
+      errorDiv.textContent = 'Minden mező kitöltése kötelező!';
+      errorDiv.classList.add('active');
+    }
+    return;
+  }
+  if (!/^\d{8}-\d-\d{2}$/.test(tax_number)) {
+    if (errorDiv) {
+      errorDiv.textContent = 'Az adószám formátuma hibás! (pl. 12345678-1-12)';
+      errorDiv.classList.add('active');
+    }
+    return;
+  }
+
+  const data = { name, address, tax_number };
   fetch('/customers', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data)
   })
   .then(res => res.json())
-  .then(() => {
-    this.reset();
-    loadCustomers();
+  .then(resp => {
+    if (resp.error && errorDiv) {
+      errorDiv.textContent = resp.error;
+      errorDiv.classList.add('active');
+    } else {
+      this.reset();
+      loadCustomers();
+    }
+  })
+  .catch(() => {
+    if (errorDiv) {
+      errorDiv.textContent = 'Hiba történt a vevő mentésekor.';
+      errorDiv.classList.add('active');
+    }
   });
 };
 
-document.getElementById('itemForm').onsubmit = function(e) {
-  e.preventDefault();
-  const data = Object.fromEntries(new FormData(this).entries());
-  data.quantity = parseFloat(data.quantity);
-  data.unit_price = parseFloat(data.unit_price);
-  data.net_amount = parseFloat(data.net_amount);
-  data.vat_amount = parseFloat(data.vat_amount);
-  data.gross_amount = parseFloat(data.gross_amount);
-  items.push(data);
-  renderItems();
-  this.reset();
-};
-
-function renderItems() {
-  const tbody = document.querySelector('#itemsTable tbody');
-  tbody.innerHTML = '';
-  items.forEach((item, idx) => {
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td>${item.name}</td>
-      <td>${item.quantity}</td>
-      <td>${item.unit}</td>
-      <td>${item.unit_price}</td>
-      <td>${item.net_amount}</td>
-      <td>${item.vat_amount}</td>
-      <td>${item.gross_amount}</td>
-      <td><button data-idx="${idx}" class="remove-item">🗑️</button></td>
-    `;
-    tbody.appendChild(tr);
-  });
-  document.querySelectorAll('.remove-item').forEach(btn => {
-    btn.onclick = function() {
-      items.splice(this.dataset.idx, 1);
-      renderItems();
-    };
-  });
-}
-
+// Számla űrlap validálás és hibakezelés
 document.getElementById('invoiceForm').onsubmit = function(e) {
   e.preventDefault();
+  const errorDiv = document.getElementById('invoiceError');
+  if (errorDiv) {
+    errorDiv.classList.remove('active');
+    errorDiv.textContent = '';
+  }
+
   const data = Object.fromEntries(new FormData(this).entries());
+  // Validálás
+  if (!data.issuer_id || !data.customer_id) {
+    if (errorDiv) {
+      errorDiv.textContent = 'Kiállító és vevő kiválasztása kötelező!';
+      errorDiv.classList.add('active');
+    }
+    return;
+  }
+  if (data.issuer_id === data.customer_id) {
+    if (errorDiv) {
+      errorDiv.textContent = 'A kiállító és a vevő nem lehet ugyanaz!';
+      errorDiv.classList.add('active');
+    }
+    return;
+  }
+  if (!data.issue_date || !data.fulfillment_date || !data.payment_deadline) {
+    if (errorDiv) {
+      errorDiv.textContent = 'Minden dátum megadása kötelező!';
+      errorDiv.classList.add('active');
+    }
+    return;
+  }
+  if (!data.total_amount || isNaN(data.total_amount) || Number(data.total_amount) <= 0) {
+    if (errorDiv) {
+      errorDiv.textContent = 'A végösszegnek pozitív számnak kell lennie!';
+      errorDiv.classList.add('active');
+    }
+    return;
+  }
+  if (!data.vat_amount || isNaN(data.vat_amount) || Number(data.vat_amount) < 0) {
+    if (errorDiv) {
+      errorDiv.textContent = 'Az ÁFA nem lehet negatív!';
+      errorDiv.classList.add('active');
+    }
+    return;
+  }
+
   data.total_amount = parseFloat(data.total_amount);
   data.vat_amount = parseFloat(data.vat_amount);
+
   fetch('/invoices', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -66,22 +109,43 @@ document.getElementById('invoiceForm').onsubmit = function(e) {
   })
   .then(res => res.json())
   .then(resp => {
-    lastInvoiceId = resp.id;
-    Promise.all(items.map(item =>
-      fetch(`/invoices/${lastInvoiceId}/items`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(item)
-      })
-    )).then(() => {
-      alert('Számla és tételek mentve!');
-      items = [];
-      renderItems();
+    if (resp.error && errorDiv) {
+      errorDiv.textContent = resp.error;
+      errorDiv.classList.add('active');
+    } else {
+      lastInvoiceId = resp.id;
+      alert('Számla mentve!');
       this.reset();
       loadInvoices();
-    });
+      generateInvoiceNumber();
+    }
+  })
+  .catch(() => {
+    if (errorDiv) {
+      errorDiv.textContent = 'Hiba történt a számla mentésekor.';
+      errorDiv.classList.add('active');
+    }
   });
 };
+
+function fillCustomerSelects(customers) {
+  const issuerSelect = document.getElementById('issuerSelect');
+  const customerSelect = document.getElementById('customerSelect');
+  issuerSelect.innerHTML = '<option value="">Kiállító kiválasztása</option>';
+  customerSelect.innerHTML = '<option value="">Vevő kiválasztása</option>';
+  customers.forEach(c => {
+    const option1 = document.createElement('option');
+    option1.value = c.id;
+    option1.textContent = `${c.name} (${c.address})`;
+    issuerSelect.appendChild(option1);
+
+    const option2 = document.createElement('option');
+    option2.value = c.id;
+    option2.textContent = `${c.name} (${c.address})`;
+    customerSelect.appendChild(option2);
+  });
+  generateInvoiceNumber();
+}
 
 function loadCustomers() {
   fetch('/customers')
@@ -94,6 +158,7 @@ function loadCustomers() {
         li.textContent = `${c.id}: ${c.name} (${c.address}, ${c.tax_number})`;
         ul.appendChild(li);
       });
+      fillCustomerSelects(customers);
     });
 }
 
@@ -144,40 +209,70 @@ function showInvoiceDetails(invoiceId) {
   fetch(`/invoices/${invoiceId}`)
     .then(res => res.json())
     .then(inv => {
-      fetch(`/invoices/${invoiceId}/items`)
-        .then(res => res.json())
-        .then(items => {
-          const div = document.getElementById('invoiceDetails');
-          div.innerHTML = `
-            <h3>Számla: ${inv.invoice_number}</h3>
-            <div><b>Kiállító:</b> ${inv.issuer_name}, ${inv.issuer_address}, ${inv.issuer_tax_number}</div>
-            <div><b>Vevő:</b> ${inv.customer_name}, ${inv.customer_address}, ${inv.customer_tax_number}</div>
-            <div><b>Kelte:</b> ${inv.issue_date}, <b>Teljesítés:</b> ${inv.fulfillment_date}, <b>Fizetési határidő:</b> ${inv.payment_deadline}</div>
-            <div><b>Státusz:</b> ${inv.is_storno ? 'Stornózva' : 'Érvényes'}</div>
-            <table>
-              <thead>
-                <tr>
-                  <th>Név</th><th>Mennyiség</th><th>Egység</th><th>Egységár</th><th>Nettó</th><th>ÁFA</th><th>Bruttó</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${items.map(item => `
-                  <tr>
-                    <td>${item.name}</td>
-                    <td>${item.quantity}</td>
-                    <td>${item.unit}</td>
-                    <td>${item.unit_price}</td>
-                    <td>${item.net_amount}</td>
-                    <td>${item.vat_amount}</td>
-                    <td>${item.gross_amount}</td>
-                  </tr>
-                `).join('')}
-              </tbody>
-            </table>
-            <div><b>Végösszeg:</b> ${inv.total_amount} Ft, <b>ÁFA:</b> ${inv.vat_amount} Ft</div>
-          `;
-        });
+      const netAmount = (inv.total_amount - inv.vat_amount).toFixed(2);
+      const vatAmount = Number(inv.vat_amount).toFixed(2);
+      const grossAmount = Number(inv.total_amount).toFixed(2);
+
+      const div = document.getElementById('invoiceDetails');
+      div.innerHTML = `
+  <div class="invoice-official">
+    <h2 style="text-align:center;margin-bottom:1em;">Számla</h2>
+    <div style="display: flex; flex-wrap: wrap; gap: 2em;">
+      <div style="flex: 1 1 220px; min-width: 200px;">
+        <h4>Eladó (kiállító)</h4>
+        <div><b>Név:</b> ${inv.issuer_name}</div>
+        <div><b>Cím:</b> ${inv.issuer_address}</div>
+        <div><b>Adószám:</b> ${inv.issuer_tax_number}</div>
+      </div>
+      <div style="flex: 1 1 220px; min-width: 200px;">
+        <h4>Vevő</h4>
+        <div><b>Név:</b> ${inv.customer_name}</div>
+        <div><b>Cím:</b> ${inv.customer_address}</div>
+        <div><b>Adószám:</b> ${inv.customer_tax_number}</div>
+      </div>
+    </div>
+    <hr style="margin:1.2em 0;">
+    <div style="display: flex; flex-wrap: wrap; gap: 2em;">
+      <div style="flex: 1 1 220px; min-width: 200px;">
+        <div><b>Számla sorszáma:</b> ${inv.invoice_number}</div>
+        <div><b>Számla kelte:</b> ${inv.issue_date}</div>
+        <div><b>Teljesítés dátuma:</b> ${inv.fulfillment_date}</div>
+        <div><b>Fizetési határidő:</b> ${inv.payment_deadline}</div>
+        <div><b>Számla státusza:</b> ${inv.is_storno ? 'Stornózva' : 'Érvényes'}</div>
+      </div>
+      <div style="flex: 1 1 220px; min-width: 200px;">
+        <div style="margin-top:1em;">
+          <b>Nettó ár:</b> ${netAmount} Ft<br>
+          <b>ÁFA:</b> ${vatAmount} Ft<br>
+          <b>Bruttó ár:</b> ${grossAmount} Ft
+        </div>
+      </div>
+    </div>
+  </div>
+      `;
     });
+}
+
+document.getElementById('customerSelect').addEventListener('change', generateInvoiceNumber);
+
+function generateInvoiceNumber() {
+  const customerSelect = document.getElementById('customerSelect');
+  const invoiceNumberInput = document.getElementById('invoice_number');
+  const selectedOption = customerSelect.options[customerSelect.selectedIndex];
+  if (!selectedOption || !selectedOption.value) {
+    invoiceNumberInput.value = '';
+    return;
+  }
+  let name = selectedOption.textContent.split(' (')[0]
+    .toUpperCase()
+    .replace(/[^A-Z0-9]/g, '_');
+  const now = new Date();
+  const dateStr = now.getFullYear().toString() +
+    String(now.getMonth() + 1).padStart(2, '0') +
+    String(now.getDate()).padStart(2, '0') +
+    String(now.getHours()).padStart(2, '0') +
+    String(now.getMinutes()).padStart(2, '0');
+  invoiceNumberInput.value = `${name}-${dateStr}`;
 }
 
 document.addEventListener('DOMContentLoaded', () => {

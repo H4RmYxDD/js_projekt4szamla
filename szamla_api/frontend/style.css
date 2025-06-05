@@ -37,6 +37,7 @@ main {
   min-width: 320px;
 }
 
+
 h1 {
   font-size: 2.2rem;
   font-weight: 700;
@@ -66,14 +67,7 @@ form {
   margin-bottom: 1.2em;
 }
 
-form.inline-form {
-  flex-direction: row;
-  flex-wrap: wrap;
-  gap: 0.5em;
-  align-items: center;
-}
-
-form input {
+form input, form select {
   font-size: 1em;
   padding: 0.45em 0.7em;
   border-radius: 6px;
@@ -82,7 +76,7 @@ form input {
   transition: border 0.2s;
 }
 
-form input:focus {
+form input:focus, form select:focus {
   border: 1.5px solid #232946;
   outline: none;
   background: #fff;
@@ -180,13 +174,83 @@ tbody tr:hover {
   cursor: not-allowed;
 }
 
-#invoiceDetails {
+.details-panel {
   background: #f7f7fa;
+  border: 2px solid #1976d2;
+  box-shadow: 0 2px 12px #1976d211;
+  min-width: 320px;
+  max-width: 100%;      
+  padding: 2em 1.5em 1.5em 1.5em;
+  flex: 1 1 350px;     
+}
+
+#invoiceDetails {
+  background: #fff;
   border-radius: 8px;
-  padding: 1.2em 1.5em;
+  padding: 1.2em 1.2em;
   margin-top: 1em;
-  font-size: 1.05em;
+  font-size: 0.98em;    
   box-shadow: 0 1px 6px #0001;
+}
+
+.invoice-official {
+  padding: 0.2em 0;
+}
+
+.invoice-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 0.7em;
+  background: #fff;
+  font-size: 0.95em;    
+}
+
+.invoice-table th, .invoice-table td {
+  border: 1px solid #e0e0e0;
+  padding: 0.25em 0.5em;
+  text-align: left;
+  word-break: break-word;
+}
+
+.invoice-table th {
+  background: #e8eaf6;
+  font-weight: 600;
+}
+
+.invoice-summary {
+  margin-top: 0.7em;
+  font-size: 1em;
+  font-weight: 600;
+  color: #232946;
+}
+
+.error-message {
+  color: #b71c1c;
+  background: #ffebee;
+  border: 1px solid #ffcdd2;
+  border-radius: 6px;
+  padding: 0.5em 1em;
+  margin-bottom: 1em;
+  font-size: 1em;
+  display: none;
+}
+.error-message.active {
+  display: block;
+}
+
+@media (max-width: 900px) {
+  .details-panel {
+    max-width: 100%;
+    min-width: 0;
+    margin-top: 1em;
+  }
+  #invoiceDetails {
+    padding: 0.5em 0.3em;
+    font-size: 0.95em;
+  }
+  .invoice-table {
+    font-size: 0.95em;
+  }
 }
 
 @media (max-width: 900px) {
